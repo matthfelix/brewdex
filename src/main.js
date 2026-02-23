@@ -175,6 +175,15 @@ function renderBeers() {
       saveSelectedBeer(beer.name)
       renderBeers()
       renderPanel(panel, beer)
+
+      // 👇 Scroll automático no mobile
+      if (window.innerWidth < 768) {
+        setTimeout(() => {
+          document
+            .getElementById("beer-details")
+            ?.scrollIntoView({ behavior: "smooth" })
+        }, 50)
+      }
     })
 
     // Clique no favorito
