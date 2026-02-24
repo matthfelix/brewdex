@@ -1,7 +1,9 @@
 export function renderStyleFilters(container, styles, selectedStyle) {
   container.innerHTML = ""
 
-  const allStyles = ["All", ...styles]
+  const allStyles = styles.includes("All")
+    ? styles
+    : ["All", ...styles]
 
   allStyles.forEach(style => {
     const btn = document.createElement("button")
@@ -11,11 +13,11 @@ export function renderStyleFilters(container, styles, selectedStyle) {
     const isActive = style === selectedStyle
 
     btn.className = `
-      px-3 py-1 rounded-full text-sm font-medium transition
+      px-3 py-2 rounded-lg border text-base font-semibold transition
       ${
         isActive
-          ? "bg-amber-600 text-white shadow"
-          : "bg-amber-100 text-slate-700 hover:bg-amber-200"
+          ? "bg-amber-500 text-white border-amber-600"
+          : "bg-white text-black border-black hover:bg-amber-100"
       }
     `
 
