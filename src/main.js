@@ -63,8 +63,21 @@ filterFavoritesBtn.addEventListener("change", () => {
   renderBeers()
 })
 
+// Se havia cerveja salva, renderiza o painel
+if (selectedBeer) {
+  const beerObj = beers.find(b => b.name === selectedBeer)
+  if (beerObj) {
+    renderPanel(panel, beerObj)
+  }
+}
+
+let searchTimeout
+
 search.addEventListener("input", () => {
-  renderBeers()
+  clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => {
+    renderBeers()
+  }, 200)
 })
 
 sortSelect.addEventListener("change", () => {
