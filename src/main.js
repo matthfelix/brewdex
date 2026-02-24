@@ -87,6 +87,7 @@ sortSelect.addEventListener("change", () => {
 styleContainer.addEventListener("click", e => {
   if (!e.target.dataset.style) return
   selectedStyle = e.target.dataset.style
+  renderStyleFilters(styleContainer, getStyles(beers), selectedStyle)
   renderBeers()
 })
 
