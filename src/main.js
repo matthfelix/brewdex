@@ -56,7 +56,7 @@ function loadSelectedBeer() {
 // ==========================
 //
 function updateFavoritesCount() {
-  const total = beers.filter(beer => isFavorite(beer.name)).length
+  const total = allBeers.filter(beer => isFavorite(beer.name)).length
   favoritesTotal.textContent = total
 }
 
@@ -74,9 +74,9 @@ async function loadBeers() {
     allBeers = await getBeers()
     status = "success"
 
-    // render inicial dos filtros
     const styles = getStyles(allBeers)
-    renderStyleFilters(styleContainer, styles, selectedStyle)
+renderStyleFilters(styleContainer, styles, selectedStyle)
+
 
     renderBeers()
     updateFavoritesCount()
@@ -221,17 +221,6 @@ function renderBeers() {
   updateFavoritesCount()
 }
 
-//
-// ==========================
-// INICIALIZAÇÃO
-// ==========================
-//
-const savedBeer = loadSelectedBeer()
-if (savedBeer) selectedBeer = savedBeer
-
-// Render inicial dos filtros
-const styles = getStyles(beers)
-renderStyleFilters(styleContainer, styles, selectedStyle)
 
 // Primeira renderização
 async function init() {
@@ -244,4 +233,7 @@ async function init() {
   updateFavoritesCount()
 }
 
-init()
+const savedBeer = loadSelectedBeer()
+if (savedBeer) selectedBeer = savedBeer
+
+loadBeers()
