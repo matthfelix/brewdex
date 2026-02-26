@@ -1,5 +1,5 @@
 import "./style.css"
-import { beers } from "./data/beers.js"
+import { getBeers } from "./services/beersService.js"
 import { isFavorite, toggleFavorite } from "./logic/favorites.js"
 import { filterBeers, getStyles } from "./logic/filters.js"
 import { safeText } from "./utils/safeText.js"
@@ -11,9 +11,16 @@ import { renderStyleFilters } from "./ui/renderStyleFilters.js"
 // ESTADO GLOBAL
 // ==========================
 //
+
+
+
+
 let selectedBeer = null
 let showOnlyFavorites = false
 let selectedStyle = "All"
+let allBeers = []
+let status = "idle" // 'idle' | 'loading' | 'success' | 'error'
+let loadError = null
 
 const SELECTED_BEER_KEY = "brewdex:selectedBeer"
 
@@ -58,26 +65,36 @@ function updateFavoritesCount() {
 // EVENTOS
 // ==========================
 //
+async function loadBeers() {
+  status = "loading"
+  loadError = null
+  renderBeers() // para mostrar loading
+
+  try {
+    allBeers = await getBeers()
+    status = "success"
+
+    // render inicial dos filtros
+    const styles = getStyles(allBeers)
+    renderStyleFilters(styleContainer, styles, selectedStyle)
+
+    renderBeers()
+    updateFavoritesCount()
+  } catch (err) {
+    status = "error"
+    loadError = err
+    renderBeers()
+  }
+}
+
+
 filterFavoritesBtn.addEventListener("change", () => {
   showOnlyFavorites = filterFavoritesBtn.checked
   renderBeers()
 })
 
-// Se havia cerveja salva, renderiza o painel
-if (selectedBeer) {
-  const beerObj = beers.find(b => b.name === selectedBeer)
-  if (beerObj) {
-    renderPanel(panel, beerObj)
-  }
-}
-
-let searchTimeout
-
 search.addEventListener("input", () => {
-  clearTimeout(searchTimeout)
-  searchTimeout = setTimeout(() => {
-    renderBeers()
-  }, 200)
+  renderBeers()
 })
 
 sortSelect.addEventListener("change", () => {
@@ -87,7 +104,6 @@ sortSelect.addEventListener("change", () => {
 styleContainer.addEventListener("click", e => {
   if (!e.target.dataset.style) return
   selectedStyle = e.target.dataset.style
-  renderStyleFilters(styleContainer, getStyles(beers), selectedStyle)
   renderBeers()
 })
 
@@ -97,8 +113,9 @@ styleContainer.addEventListener("click", e => {
 // ==========================
 //
 function renderBeers() {
-  let beersToRender = [...beers]
+  let beersToRender = [...allBeers]
 
+  
   // 1. Busca
   beersToRender = filterBeers(beersToRender, search.value)
 
@@ -189,15 +206,6 @@ function renderBeers() {
       saveSelectedBeer(beer.name)
       renderBeers()
       renderPanel(panel, beer)
-
-      // 👇 Scroll automático no mobile
-      if (window.innerWidth < 768) {
-        setTimeout(() => {
-          document
-            .getElementById("beer-details")
-            ?.scrollIntoView({ behavior: "smooth" })
-        }, 50)
-      }
     })
 
     // Clique no favorito
@@ -226,5 +234,14 @@ const styles = getStyles(beers)
 renderStyleFilters(styleContainer, styles, selectedStyle)
 
 // Primeira renderização
-renderBeers()
-updateFavoritesCount()
+async function init() {
+  allBeers = await getBeers()
+
+  const styles = getStyles(allBeers)
+  renderStyleFilters(styleContainer, styles, selectedStyle)
+
+  renderBeers()
+  updateFavoritesCount()
+}
+
+init()
